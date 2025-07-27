@@ -9,17 +9,15 @@
 # 立花証券ｅ支店ＡＰＩ利用のサンプルコード
 # 機能: 現物買い注文を行ないます。
 #
-# 利用方法: 
-# 事前に「e_api_login_tel.py」を実行して、仮想URL等を取得しておいてください。
-# 
-# コード後半にある「プログラム始点」以下の設定項目を自身の設定に変更してご利用ください。
+# 設定項目
 # my_sIssueCode = '1234'  # 10.銘柄コード。実際の銘柄コードを入れてください。
 # my_sSizyouC = '00'      # 11.市場。  00:東証   現在(2021/07/01)、東証のみ可能。
 # my_sCondition = '0'     # 13.執行条件。  0:指定なし、2:寄付、4:引け、6:不成。指し値は、0:指定なし。
 # my_sOrderPrice = '000'  # 14.注文値段。  *:指定なし、0:成行、上記以外は、注文値段。小数点については、関連資料:「立花証券・e支店・API、REQUEST I/F、マスタデータ利用方法」の「2-12. 呼値」参照。
 # my_sOrderSuryou = '100' # 15.注文数量。
 # 
-# 
+# 利用方法: 
+# 事前に「e_api_login_tel.py」を実行して、仮想URL等を取得しておいてください。
 #
 # == ご注意: ========================================
 #   本番環境にに接続した場合、実際に市場に注文が出ます。
@@ -65,6 +63,7 @@ class class_def_login_property:
         self.sUrlPrice = ''         # price用仮想URL
         self.sUrlEvent = ''         # event用仮想URL
         self.sZyoutoekiKazeiC = ''  # 8.譲渡益課税区分    1：特定  3：一般  5：NISA     ログインの返信データで設定済み。 
+        self.sSinyouKouzaKubun = '' # 信用取引口座開設区分  0：未開設  1：開設
         self.sSecondPassword = ''   # 22.第二パスワード  APIでは第２暗証番号を省略できない。 関連資料:「立花証券・e支店・API、インターフェース概要」の「3-2.ログイン、ログアウト」参照
         self.sJsonOfmt = ''         # 返り値の表示形式指定
         
@@ -299,16 +298,17 @@ def func_get_acconut_info(fname, class_account_property):
 # 機能： ログイン情報をファイルから取得する
 # 引数1: ログイン情報を保存したファイル名（fname_login_response = "e_api_login_response.txt"）
 # 引数2: ログインデータ型（class_def_login_property型）
-def func_get_login_info(str_fname, class_login_property):
+def func_get_login_info(str_fname, my_login_property):
     str_login_respons = func_read_from_file(str_fname)
     dic_login_respons = json.loads(str_login_respons)
-    class_login_property.sUrlRequest = dic_login_respons.get('sUrlRequest')                # request用仮想URL
-    class_login_property.sUrlMaster = dic_login_respons.get('sUrlMaster')                  # master用仮想URL
-    class_login_property.sUrlPrice = dic_login_respons.get('sUrlPrice')                    # price用仮想URL
-    class_login_property.sUrlEvent = dic_login_respons.get('sUrlEvent')                    # event用仮想URL
-    class_login_property.sUrlEventWebSocket = dic_login_respons.get('sUrlEventWebSocket')  # webxocket用仮想URL
-    class_login_property.sZyoutoekiKazeiC = dic_login_respons.get('sZyoutoekiKazeiC')      # 8.譲渡益課税区分    1：特定  3：一般  5：NISA     ログインの返信データで設定済み。 
-    
+    my_login_property.sUrlRequest = dic_login_respons.get('sUrlRequest')                # request用仮想URL
+    my_login_property.sUrlMaster = dic_login_respons.get('sUrlMaster')                  # master用仮想URL
+    my_login_property.sUrlPrice = dic_login_respons.get('sUrlPrice')                    # price用仮想URL
+    my_login_property.sUrlEvent = dic_login_respons.get('sUrlEvent')                    # event用仮想URL
+    my_login_property.sUrlEventWebSocket = dic_login_respons.get('sUrlEventWebSocket')  # webxocket用仮想URL
+    my_login_property.sZyoutoekiKazeiC = dic_login_respons.get('sZyoutoekiKazeiC')      # 8.譲渡益課税区分    1：特定  3：一般  5：NISA     ログインの返信データで設定済み。 
+    my_login_property.sZyoutoekiKazeiC = dic_login_respons.get('sSinyouKouzaKubun')     # 信用取引口座開設区分  0：未開設  1：開設     ログインの返信データで設定済み。 
+
 
 # 機能： p_noをファイルから取得する
 # 引数1: p_noを保存したファイル名（fname_info_p_no = "e_api_info_p_no.txt"）
@@ -575,10 +575,6 @@ def func_neworder_buy_genbutsu(str_sIssueCode,
 # ==== プログラム始点 =================================================================================
 # ======================================================================================================
 # 必要な設定項目
-# 接続先:  my_url 
-# ユーザーID:   my_userid 
-# パスワード:    my_passwd （ログイン時に使うパスワード）
-# 第2パスワード: my_2pwd （発注時に使うパスワード）
 # 銘柄コード: my_sIssueCode （実際の銘柄コードを入れてください。）
 # 市場: my_sSizyouC （00:東証   現在(2021/07/01)、東証のみ可能。）
 # 執行条件: my_sCondition   （0:指定なし、2:寄付、4:引け、6:不成。指し値は、0:指定なし。）
@@ -621,7 +617,8 @@ if __name__ == "__main__":
     
     # 現在（前回利用した）のp_noをファイルから取得する
     func_get_p_no(fname_info_p_no, my_login_property)
-        
+    my_login_property.p_no = my_login_property.p_no + 1
+    
     print()
     print('-- 現物 買い注文  -------------------------------------------------------------')
     # 当日の現物注文（逆指値等は使わない）でパラメーターを減らした簡単な関数例
@@ -653,7 +650,6 @@ if __name__ == "__main__":
     # }
     # この注文例を基にrequest電文を作成してみる
 
-    my_login_property.p_no = my_login_property.p_no + 1
     # 現物 買い注文    引数：p_no、銘柄コード、市場（現在、東証'00'のみ）、執行条件、価格、株数、口座属性クラス
     dic_return = func_neworder_buy_genbutsu(my_sIssueCode,
                                             my_sSizyouC,
