@@ -1,9 +1,6 @@
 # e_api_neworder_buy_genbutsu_tel.py
 電話認証対応版　現物買い注文
 
-（事前に「電話認証＋e_api_login_tel.py実行」が必要）
-
-
 ｅ支店APIのロサンプルコード（python）
 
 APIバージョン： v4r7で動作確認
@@ -32,10 +29,14 @@ APIバージョン： v4r7で動作確認
 
 ２）APIの利用には事前に立花証券ｅ支店に口座開設が必要です。
 
-  e_api_login_response.txtの仮想URLが有効であることが必要です。
+  e_api_login_response.txtの仮想URL（１日券）が有効であることが必要です。
   有効でない場合、動作しません。
 
 ３）実行はコマンドプロンプト等からpython環境で起動してください。
+
+	事前に
+ 	電話認証 ＋ ３分以内に e_api_login_tel.py を実行
+  	で、仮想URL（１日券）を取得しておいてください。
 
 ４）実行内容は、以下になります。
 
